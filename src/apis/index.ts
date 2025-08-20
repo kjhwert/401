@@ -9,7 +9,7 @@ const api = axios.create({
 });
 
 // 토큰 갱신 Promise
-let refreshTokenRequest: Promise<string> | null = null;
+let refreshTokenRequest: Promise<number> | null = null;
 
 api.interceptors.response.use(
   (response) => response,
@@ -21,9 +21,10 @@ api.interceptors.response.use(
     // 401 에러응답일 때 토큰 재발행 요청 및 기존 API 재요청
     if (error.response?.status === 401) {
       refreshTokenRequest ||= api
-        .post("/auth/token")
+        .post<{ token: number }>("/auth/token")
         .then((res) => {
           const newToken = res.data.token;
+
           api.defaults.headers["Authorization"] = newToken;
           return newToken;
         })
